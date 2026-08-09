@@ -33,7 +33,9 @@ export function AddJobButton({
             return (
               <DropdownMenuItem
                 key={item.id}
-                onClick={() => addExpense(item.job)}
+                onClick={() =>
+                  addExpense({ ...item.job, id: crypto.randomUUID() })
+                }
               >
                 <span className="text-sm font-mono font-semibold">
                   {item.name}

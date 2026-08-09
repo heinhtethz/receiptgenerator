@@ -233,14 +233,14 @@ export default function InvoiceEditor({
   if (loading) return <SkeletonCard />;
 
   return (
-    <main className="bg-muted/90 min-h-screen pb-5">
+    <main className="bg-muted/90 min-h-screen px-1 pb-5">
       {!openPreview ? (
         <div className="w-full max-w-3xl mx-auto">
-          <div className="flex justify-between py-5">
+          <div className="flex flex-col gap-4 sm:flex-row justify-between py-5">
             <h1 className="text-2xl font-bold tracking-tight text-balance">
               {isNew ? "Create New Invoice" : "Edit Invoice"}
             </h1>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-5">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -296,7 +296,7 @@ export default function InvoiceEditor({
             </CardHeader>
             <CardContent>
               <FieldSet>
-                <FieldGroup className="grid grid-cols-3">
+                <FieldGroup className="grid grid-cols-1 sm:grid-cols-3">
                   <Field className="col-span-1">
                     <FieldLabel>Port</FieldLabel>
                     <PortSelector
@@ -366,7 +366,7 @@ export default function InvoiceEditor({
                           prevBalanceDate: e.target.value,
                         })
                       }
-                      className="uppercase"
+                      className="uppercase text-sm"
                     />
                   </Field>
                 </FieldGroup>
@@ -401,23 +401,28 @@ export default function InvoiceEditor({
                           advanceDate: e.target.value,
                         })
                       }
-                      className="uppercase"
+                      className="uppercase text-sm"
                     />
                   </Field>
                 </FieldGroup>
 
                 <FieldSeparator />
 
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row justify-between gap-5">
                   <FieldTitle className="text-xl font-semibold">
                     Expenses
                   </FieldTitle>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-5">
                     <AddJobButton addExpense={addExpense} />
                     <Button
                       variant={"default"}
-                      onClick={() => addExpense(newSimpleExpense)}
+                      onClick={() =>
+                        addExpense({
+                          ...newSimpleExpense,
+                          id: crypto.randomUUID(),
+                        })
+                      }
                       className="text-xs bg-emerald-700 text-white hover:bg-emerald-600 hover:scale-105 focus:bg-emerald-600"
                     >
                       Add Simple <CirclePlus />

@@ -77,11 +77,13 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex bg-muted/40 h-[calc(100vh-64px)] justify-center items-center">
-      <Card className="w-full max-w-sm flex flex-col gap-6 border-2 border-gray-600 rounded-4xl py-4">
-        <CardHeader>
-          <CardTitle className="text-center">Sign in to your account</CardTitle>
-          <CardDescription className="text-center">
+    <div className="flex flex-1 min-h-[calc(100dvh-4rem)] w-full items-center justify-center p-4 sm:p-6 bg-muted/40">
+      <Card className="w-full max-w-sm border-border shadow-sm rounded-xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl text-center">
+            Sign in to your account
+          </CardTitle>
+          <CardDescription className="text-center text-sm">
             Enter your email below to sign in to your account
           </CardDescription>
         </CardHeader>
@@ -105,7 +107,7 @@ export default function SignInPage() {
                   <Label htmlFor="password">Password</Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-sm underline-offset-4 hover:underline text-muted-foreground"
+                    className="text-xs sm:text-sm underline-offset-4 hover:underline text-muted-foreground"
                   >
                     Forgot password?
                   </Link>
@@ -139,15 +141,15 @@ export default function SignInPage() {
         </CardContent>
         <CardFooter className="flex-col gap-4">
           <div className="relative w-full flex items-center justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or</span>
-            <div className="absolute inset-0 flex items-center -z-10">
-              <span className="w-full border-t border-muted" />
+            <span className="bg-card px-2 text-muted-foreground z-10">Or</span>
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
             </div>
           </div>
 
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full gap-2"
             onClick={signInWithGoogle}
             disabled={isLoading}
           >

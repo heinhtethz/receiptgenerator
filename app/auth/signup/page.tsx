@@ -7,11 +7,13 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 
 export default function SignUpPage() {
@@ -99,18 +101,19 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex bg-muted/40 h-[calc(100vh-64px)] justify-center items-center">
-      <Card className="w-full max-w-sm flex flex-col gap-6 border-2 border-gray-600 rounded-4xl py-4">
-        <CardHeader>
-          <CardTitle className="text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">
+    <div className="flex flex-1 min-h-[calc(100dvh-4rem)] w-full items-center justify-center p-4 sm:p-6 py-8 bg-muted/40">
+      <Card className="w-full max-w-sm border-border shadow-sm rounded-xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl text-center">
+            Create Account
+          </CardTitle>
+          <CardDescription className="text-center text-sm">
             Enter your details below to create a new account or log in
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleEmailSignUp}>
             <div className="flex flex-col gap-4">
-              {/* New Name Field */}
               <div className="grid gap-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -136,6 +139,7 @@ export default function SignUpPage() {
                   disabled={isLoading}
                 />
               </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -147,6 +151,7 @@ export default function SignUpPage() {
                   disabled={isLoading}
                 />
               </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
@@ -176,6 +181,17 @@ export default function SignUpPage() {
             </div>
           </form>
         </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <div className="text-sm text-center text-muted-foreground">
+            <span>Already have an account? </span>
+            <Link
+              href="/auth/signin"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign in
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

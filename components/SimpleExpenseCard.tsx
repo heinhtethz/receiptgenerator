@@ -47,7 +47,7 @@ const SimpleExpenseCard = ({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-2">
-        <FieldGroup className="grid grid-cols-4">
+        <FieldGroup className="grid grid-cols-2 sm:grid-cols-4">
           <Field className="col-span-2">
             <FieldLabel className="font-bold">Simple Title</FieldLabel>
             <Input
@@ -57,6 +57,7 @@ const SimpleExpenseCard = ({
               onChange={(e) =>
                 onUpdateExpense({ description: e.target.value.toUpperCase() })
               }
+              className="text-xs"
             />
           </Field>
           <Field className="col-span-1">
@@ -73,6 +74,7 @@ const SimpleExpenseCard = ({
               onChange={(e) => {
                 onUpdateExpense({ amount: Number(e.target.value) });
               }}
+              className="text-xs"
             />
           </Field>
           <Field className="col-span-1">
@@ -83,7 +85,7 @@ const SimpleExpenseCard = ({
               min={firstDayOfCurrentMonth}
               value={formatDate(date) || ""}
               onChange={(e) => onUpdateExpense({ date: e.target.value })}
-              className="uppercase"
+              className="uppercase text-xs"
             />
           </Field>
         </FieldGroup>

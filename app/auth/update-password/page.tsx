@@ -7,16 +7,19 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -24,6 +27,12 @@ export default function UpdatePasswordPage() {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
+
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Passwords do not match. Please try again.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.updateUser({
@@ -39,7 +48,7 @@ export default function UpdatePasswordPage() {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("Unexpected error occur");
+        setErrorMessage("Unexpected error occurred");
       }
     } finally {
       setIsLoading(false);
@@ -47,12 +56,14 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="flex bg-muted/40 h-[calc(100vh-64px)] justify-center items-center">
-      <Card className="w-full max-w-sm flex flex-col gap-6 border-2 border-gray-600 rounded-4xl py-4">
-        <CardHeader>
-          <CardTitle className="text-center">Update Password</CardTitle>
-          <CardDescription className="text-center">
-            Type New Password
+    <div className="flex flex-1 min-h-[calc(100dvh-4rem)] w-full items-center justify-center p-4 sm:p-6 bg-muted/40">
+      <Card className="w-full max-w-sm border-border shadow-sm rounded-xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl text-center">
+            Update Password
+          </CardTitle>
+          <CardDescription className="text-center text-sm">
+            Enter your new password below to update your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,6 +76,18 @@ export default function UpdatePasswordPage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={isLoading}
                 />
@@ -86,6 +109,16 @@ export default function UpdatePasswordPage() {
             </div>
           </form>
         </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <div className="text-sm text-center text-muted-foreground">
+            <Link
+              href="/auth/signin"
+              className="text-primary hover:underline font-medium"
+            >
+              Back to Login Page
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );
