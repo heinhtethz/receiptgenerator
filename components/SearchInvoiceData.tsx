@@ -32,7 +32,7 @@ export function SearchInvoiceData({
         value={searchType}
         onValueChange={(value) => setSearchType(value)}
       >
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-30 md:w-40">
           <SelectValue placeholder="Search by" />
         </SelectTrigger>
         <SelectContent>
@@ -54,7 +54,7 @@ export function SearchInvoiceData({
             : `Search by ${searchType}`
         }
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-60"
+        className="w-40 md:w-60 text-sm"
       />
     </div>
   );

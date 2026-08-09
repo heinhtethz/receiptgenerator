@@ -270,7 +270,7 @@ export const MyDocument = ({
         fixed
       />
 
-      <Text style={styles.watermark} render={() => `Develop by Hz`} />
+      <Text style={styles.watermark} render={() => `Developed by Hz`} />
     </Page>
   </Document>
 );

@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
       if (error instanceof Error) {
         setMessage(error.message);
       } else {
-        setMessage("Unexpected error occur");
+        setMessage("Unexpected error occurred");
       }
     } finally {
       setIsLoading(false);
@@ -49,12 +49,14 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex bg-muted/40 h-[calc(100vh-64px)] justify-center items-center">
-      <Card className="w-full max-w-sm flex flex-col gap-6 border-2 border-gray-600 rounded-4xl py-4">
-        <CardHeader>
-          <CardTitle className="text-center">Reset Password</CardTitle>
-          <CardDescription className="text-center">
-            Type your email address
+    <div className="flex flex-1 min-h-[calc(100dvh-4rem)] w-full items-center justify-center p-4 sm:p-6 bg-muted/40">
+      <Card className="w-full max-w-sm border-border shadow-sm rounded-xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl sm:text-2xl text-center">
+            Reset Password
+          </CardTitle>
+          <CardDescription className="text-center text-sm">
+            Enter your email address to receive a password reset link
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,7 +77,11 @@ export default function ForgotPasswordPage() {
 
               {message && (
                 <div
-                  className={`text-sm text-center font-medium ${isError ? "text-destructive" : "text-emerald-600"}`}
+                  className={`text-sm text-center font-medium ${
+                    isError
+                      ? "text-destructive"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  }`}
                 >
                   {message}
                 </div>
@@ -91,8 +97,8 @@ export default function ForgotPasswordPage() {
             </div>
           </form>
         </CardContent>
-        <CardFooter className="flex-col gap-4">
-          <div className="text-sm text-center text-muted-foreground mt-2">
+        <CardFooter className="flex-col gap-2">
+          <div className="text-sm text-center text-muted-foreground">
             <Link
               href="/auth/signin"
               className="text-primary hover:underline font-medium"

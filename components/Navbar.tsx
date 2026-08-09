@@ -51,7 +51,7 @@ export default function Navbar() {
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="w-full h-14 flex items-center justify-between px-10">
+      <div className="w-full h-14 flex items-center justify-between px-5 sm:px-10">
         <Link href="/" className="font-bold text-xl">
           <Logo />
         </Link>
