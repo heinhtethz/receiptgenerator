@@ -3,7 +3,6 @@
 import { getRemainingBalance, saveInvoice } from "@/app/actions/invoice";
 import { AddJobButton } from "@/components/AddJobButton";
 import { PortSelector } from "@/components/PortSelector";
-import { SkeletonCard } from "@/components/SkeletonCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,13 +47,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import { Spinner } from "./ui/spinner";
 
 const Preview = dynamic(
   () => import("@/components/Preview").then((mod) => mod.Preview),
   {
     loading: () => (
       <div className="flex items-center justify-center p-20 text-muted-foreground animate-pulse">
-        Loading preview...
+        <Spinner />
       </div>
     ),
   },
@@ -91,33 +91,21 @@ export default function InvoiceEditor({
   );
   const [openPreview, setOpenPreview] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let isMounted = true;
     try {
       if (isNew) {
         getRemainingBalance().then((res) => {
-          if (isMounted) {
-            setInvoiceData((prev) => ({
-              ...prev,
-              prevBalanceAmount: res.amount,
-              prevBalanceDate: res.date ? formatDate(res.date) : "",
-            }));
-          }
+          setInvoiceData((prev) => ({
+            ...prev,
+            prevBalanceAmount: res.amount,
+            prevBalanceDate: res.date ? formatDate(res.date) : "",
+          }));
         });
       }
     } catch (err) {
       console.error("Failed to fetch balance:", err);
-    } finally {
-      if (isMounted) {
-        setLoading(false);
-      }
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [isNew]);
 
   const { calculatedTotal, calculatedRemaining, totalAdvanceOrBalance } =
@@ -252,8 +240,6 @@ export default function InvoiceEditor({
   const clearAllExpenses = () => {
     setExpenses([]);
   };
-
-  if (loading) return <SkeletonCard />;
 
   return (
     <main className="bg-muted/90 min-h-screen px-1 pb-5">

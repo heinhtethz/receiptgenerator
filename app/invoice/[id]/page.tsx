@@ -1,6 +1,6 @@
 import { formatDate } from "@/lib/utils";
 import { getInvoiceById, getRemainingBalance } from "../../actions/invoice";
-import InvoiceEditor from "./InvoiceEditor";
+import InvoiceEditor from "../../../components/InvoiceEditor";
 import { InvoiceData } from "@/types";
 
 export default async function InvoicePage({
