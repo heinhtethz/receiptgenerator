@@ -1,8 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, DollarSign, Receipt } from "lucide-react";
-import InvoiceDataOnDashboard from "@/components/InvoiceDataOnDashboard";
 import { getAllInvoice, getRemainingBalance } from "../actions/invoice";
 import { formatDate } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const InvoiceDataOnDashboard = dynamic(
+  () => import("@/components/InvoiceDataOnDashboard"),
+  {
+    loading: () => (
+      <div className="h-24 w-full bg-muted/50 animate-pulse border rounded-xl mb-4" />
+    ),
+  },
+);
 
 export default async function DashboardPage() {
   const { invoices, user } = await getAllInvoice();

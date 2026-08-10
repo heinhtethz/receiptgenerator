@@ -2,10 +2,7 @@
 
 import { getRemainingBalance, saveInvoice } from "@/app/actions/invoice";
 import { AddJobButton } from "@/components/AddJobButton";
-import JobExpenseCard from "@/components/JobExpenseCard";
 import { PortSelector } from "@/components/PortSelector";
-import { Preview } from "@/components/Preview";
-import SimpleExpenseCard from "@/components/SimpleExpenseCard";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import {
   AlertDialog,
@@ -50,6 +47,33 @@ import { CirclePlus, Eye, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+const Preview = dynamic(
+  () => import("@/components/Preview").then((mod) => mod.Preview),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center p-20 text-muted-foreground animate-pulse">
+        Loading preview...
+      </div>
+    ),
+  },
+);
+
+const JobExpenseCard = dynamic(() => import("@/components/JobExpenseCard"), {
+  loading: () => (
+    <div className="h-40 w-full bg-muted/50 animate-pulse border rounded-xl mb-4" />
+  ),
+});
+
+const SimpleExpenseCard = dynamic(
+  () => import("@/components/SimpleExpenseCard"),
+  {
+    loading: () => (
+      <div className="h-24 w-full bg-muted/50 animate-pulse border rounded-xl mb-4" />
+    ),
+  },
+);
 
 interface InvoiceEditorProps {
   initialData: InvoiceData;
@@ -132,7 +156,6 @@ export default function InvoiceEditor({
 
   const handleSave = async () => {
     setIsSaving(true);
-
     const toastId = toast.loading("Saving invoice...");
 
     try {
