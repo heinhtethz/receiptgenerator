@@ -1,8 +1,6 @@
-// components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -56,18 +54,7 @@ export default function Navbar() {
           <Logo />
         </Link>
         <nav className="flex items-center gap-2">
-          {user ? (
-            <AccountDropdown email={user.email} />
-          ) : (
-            <>
-              <Button variant="ghost" asChild>
-                <Link href="/auth/signin">Sign in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth/signup">Sign up</Link>
-              </Button>
-            </>
-          )}
+          {user && <AccountDropdown email={user.email} />}
         </nav>
       </div>
     </header>
