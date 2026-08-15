@@ -66,7 +66,9 @@ const JobExpenseCard = ({
               value={description.toUpperCase() || ""}
               placeholder="Type your job here."
               onChange={(e) =>
-                onUpdateExpense({ description: e.target.value.toUpperCase() })
+                onUpdateExpense({
+                  description: e.target.value.toUpperCase(),
+                })
               }
               className="resize-none min-h-10 font-bold w-full text-sm"
             />
@@ -101,7 +103,7 @@ const JobExpenseCard = ({
                   <Input
                     id="extra"
                     placeholder="Label"
-                    value={subExpense.label.toUpperCase() || ""}
+                    value={subExpense.label.toUpperCase().trim() || ""}
                     onChange={(e) =>
                       onUpdateSubExpense(subExpense.id, {
                         label: e.target.value.toUpperCase(),

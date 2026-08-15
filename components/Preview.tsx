@@ -72,17 +72,16 @@ export const Preview = ({
           {/* 1. Header Section */}
           <div className="flex justify-between items-start sm:items-end mb-4 border-b pb-4 gap-2 sm:gap-0">
             <h2 className="text-sm sm:text-lg font-bold uppercase tracking-wide">
-              {data.port || ""}
+              {data.port.trim() || ""}
             </h2>
             <h2 className="text-sm sm:text-lg font-bold uppercase tracking-wide">
-              {data.employeeName || ""}
+              {data.employeeName.trim() || ""}
             </h2>
             <h2 className="text-sm sm:text-lg font-bold uppercase tracking-wide">
               {formatDate(data.date)}
             </h2>
           </div>
 
-          {/* Advance / Balance Details under Port */}
           {(data.advanceAmount ||
             data.prevBalanceAmount ||
             data.advanceDate ||
@@ -132,7 +131,12 @@ export const Preview = ({
                       {idx + 1}.
                     </span>
                     <span className="flex-1 pr-2 sm:pr-4 font-bold text-xs sm:text-sm uppercase tracking-wide whitespace-pre-wrap wrap-break-word">
-                      {expense.description}
+                      {expense.description.trim()}
+                      {expense.type === "simple" && (
+                        <span className="ml-3">
+                          ( {formatDate(expense.date)} )
+                        </span>
+                      )}
                     </span>
                     <span className="w-20 sm:w-32 text-right font-bold text-xs sm:text-sm tracking-wider">
                       {expense.amount > 0 ? expense.amount.toLocaleString() : 0}
@@ -148,7 +152,7 @@ export const Preview = ({
                         className="flex flex-row justify-between items-start sm:items-center ml-6 sm:ml-10 mt-2 text-zinc-600 text-[10px] sm:text-xs uppercase tracking-wide"
                       >
                         <span className="flex-1 pr-2 wrap-break-word">
-                          {sub.label}
+                          {sub.label.trim()}
                         </span>
                         <span className="w-20 sm:w-32 text-right font-normal tracking-wider shrink-0">
                           {sub.amount > 0 ? sub.amount.toLocaleString() : 0}

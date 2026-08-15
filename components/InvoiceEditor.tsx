@@ -322,7 +322,7 @@ export default function InvoiceEditor({
                       onChange={(e) =>
                         setInvoiceData({
                           ...invoiceData,
-                          employeeName: e.target.value,
+                          employeeName: e.target.value.trim(),
                         })
                       }
                       className="uppercase"

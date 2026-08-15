@@ -61,7 +61,8 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
     });
 
     const sorted = [...filtered].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      (a, b) =>
+        new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
     );
 
     const groups: Record<string, InvoiceData[]> = {};
@@ -259,7 +260,7 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                         <TableHead className="text-right">
                           Balance (MMK)
                         </TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
+                        <TableHead className="w-12.5"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

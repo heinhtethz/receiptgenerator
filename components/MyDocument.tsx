@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     fontSize: 14,
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   amountCol: {
     width: mm(25),
@@ -88,6 +88,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 1.5,
   },
+  simpleDate: {
+    marginLeft: mm(5),
+  },
 
   // --- Footer Styles ---
   footerContainer: {
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     bottom: mm(5),
     right: mm(17),
     marginTop: mm(10),
-    alignItems: "flex-end", // ညာဘက်သို့ ကပ်ထားရန်
+    alignItems: "flex-end",
   },
   footerBox: {
     width: mm(75),
@@ -163,8 +166,10 @@ export const MyDocument = ({
     <Page size="A4" style={styles.page} wrap>
       {/* 1. Header Section */}
       <View style={styles.headerRow} fixed>
-        <Text style={styles.titleText}>{data.port || ""}</Text>
-        <Text style={styles.titleText}>{data.employeeName || ""}</Text>
+        <Text style={styles.titleText}>{data.port.trimEnd() || ""}</Text>
+        <Text style={styles.titleText}>
+          {data.employeeName.trimEnd() || ""}
+        </Text>
         <Text style={styles.titleText}>{formatDate(data.date)}</Text>
       </View>
       {/* Advance / Balance Details under Port */}
@@ -220,7 +225,12 @@ export const MyDocument = ({
               {/* Main Expense Line */}
               <View style={styles.mainRow}>
                 <Text style={styles.indexCol}>{idx + 1}.</Text>
-                <Text style={styles.descCol}>{expense.description}</Text>
+                <Text style={styles.descCol}>
+                  {expense.description.trimEnd()}{" "}
+                  {expense.type === "simple" &&
+                    expense.date &&
+                    `(${formatDate(expense.date)})`}
+                </Text>
 
                 <Text style={styles.amountCol}>
                   {expense.amount > 0 ? expense.amount.toLocaleString() : ""}
@@ -231,7 +241,7 @@ export const MyDocument = ({
                 expense.subExpenses &&
                 expense.subExpenses.map((sub, sIdx) => (
                   <View key={sub.id || sIdx} style={styles.subRow}>
-                    <Text>{sub.label}</Text>
+                    <Text>{sub.label.trimEnd()}</Text>
                     <Text style={styles.subAmount}>
                       {sub.amount > 0 ? sub.amount.toLocaleString() : ""}
                     </Text>
