@@ -103,7 +103,7 @@ const JobExpenseCard = ({
                   <Input
                     id="extra"
                     placeholder="Label"
-                    value={subExpense.label.toUpperCase().trim() || ""}
+                    value={subExpense.label.toUpperCase() || ""}
                     onChange={(e) =>
                       onUpdateSubExpense(subExpense.id, {
                         label: e.target.value.toUpperCase(),

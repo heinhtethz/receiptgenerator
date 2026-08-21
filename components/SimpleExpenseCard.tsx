@@ -56,7 +56,7 @@ const SimpleExpenseCard = ({
               placeholder="Type your simple expense here"
               onChange={(e) =>
                 onUpdateExpense({
-                  description: e.target.value.toUpperCase().trim(),
+                  description: e.target.value.toUpperCase(),
                 })
               }
               className="text-xs"
