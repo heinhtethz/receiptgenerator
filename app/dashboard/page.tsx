@@ -16,7 +16,6 @@ const InvoiceDataOnDashboard = dynamic(
 export default async function DashboardPage() {
   const { invoices, user } = await getAllInvoice();
   const { amount, date } = await getRemainingBalance();
-
   const totalInvoices = invoices.length;
 
   const totalExpenses = invoices.reduce(

@@ -85,28 +85,103 @@ export default function InvoiceEditor({
   isNew = false,
 }: InvoiceEditorProps) {
   const router = useRouter();
+
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(initialData);
   const [expenses, setExpenses] = useState<Expense[]>(
     initialData.expenses || [],
   );
+
   const [openPreview, setOpenPreview] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  const [isDraftLoaded, setIsDraftLoaded] = useState<boolean>(false);
+
+  const draftKey = isNew
+    ? "invoice_draft_new"
+    : `invoice_draft_${initialData.id || "edit"}`;
+
+  const initialExpenses = initialData.expenses || [];
+
+  // Compare current state with the original initialData
+  const isUnchanged =
+    JSON.stringify(invoiceData) === JSON.stringify(initialData) &&
+    JSON.stringify(expenses) === JSON.stringify(initialExpenses);
+
   useEffect(() => {
-    try {
-      if (isNew) {
-        getRemainingBalance().then((res) => {
-          setInvoiceData((prev) => ({
-            ...prev,
-            prevBalanceAmount: res.amount,
-            prevBalanceDate: res.date ? formatDate(res.date) : "",
-          }));
-        });
+    const timer = setTimeout(() => {
+      let hasDraft = false;
+      const savedDraft = localStorage.getItem(draftKey);
+
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          if (parsed.invoiceData) setInvoiceData(parsed.invoiceData);
+          if (parsed.expenses) setExpenses(parsed.expenses);
+          hasDraft = true;
+        } catch (error) {
+          console.error("Failed to parse draft from localStorage:", error);
+        }
       }
-    } catch (err) {
-      console.error("Failed to fetch balance:", err);
+
+      if (isNew && !hasDraft) {
+        getRemainingBalance()
+          .then((res) => {
+            setInvoiceData((prev) => ({
+              ...prev,
+              prevBalanceAmount: res.amount,
+              prevBalanceDate: res.date ? formatDate(res.date) : "",
+            }));
+          })
+          .catch((err) => console.error("Failed to fetch balance:", err));
+      }
+
+      setIsDraftLoaded(true);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [isNew, draftKey]);
+
+  // Save as draft in localstorage
+  useEffect(() => {
+    if (!isDraftLoaded) return;
+
+    if (isNew) {
+      const hasContent =
+        Boolean(invoiceData.employeeName?.trim()) ||
+        Boolean(invoiceData.port?.trim()) ||
+        expenses.length > 0 ||
+        Boolean(invoiceData.advanceAmount) ||
+        Boolean(invoiceData.prevBalanceAmount);
+
+      if (hasContent) {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ invoiceData, expenses }),
+        );
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    } else {
+      if (isUnchanged) {
+        // Nothing changed: remove draft so no badge/draft state is triggered
+        localStorage.removeItem(draftKey);
+      } else {
+        // User made modifications: save changes as a draft
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ invoiceData, expenses }),
+        );
+      }
     }
-  }, [isNew]);
+  }, [
+    invoiceData,
+    expenses,
+    isDraftLoaded,
+    draftKey,
+    isNew,
+    initialData,
+    isUnchanged,
+  ]);
 
   const { calculatedTotal, calculatedRemaining, totalAdvanceOrBalance } =
     useMemo(() => {
@@ -150,6 +225,8 @@ export default function InvoiceEditor({
       const result = await saveInvoice(finalInvoiceData, isNew);
 
       if (result?.success) {
+        localStorage.removeItem(draftKey);
+
         toast.success(
           isNew
             ? "Invoice created successfully!"
@@ -241,13 +318,32 @@ export default function InvoiceEditor({
     setExpenses([]);
   };
 
+  const clearDraftAndReset = () => {
+    localStorage.removeItem(draftKey);
+    setInvoiceData(initialData);
+    setExpenses(initialData.expenses || []);
+  };
+
+  if (!isDraftLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/90">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <main className="bg-muted/90 min-h-screen px-1 pb-5">
       {!openPreview ? (
         <div className="w-full max-w-3xl mx-auto">
           <div className="flex flex-col gap-4 sm:flex-row justify-between py-5">
-            <h1 className="text-2xl font-bold tracking-tight text-balance">
+            <h1 className="text-2xl font-bold tracking-tight text-balance flex items-center gap-2">
               {isNew ? "Create New Invoice" : "Edit Invoice"}
+              {isDraftLoaded && (
+                <span className="text-xs font-normal text-muted-foreground bg-gray-200 px-2 py-1 rounded-full">
+                  Auto-saving as draft
+                </span>
+              )}
             </h1>
             <div className="grid grid-cols-2 gap-5">
               <AlertDialog>
@@ -255,6 +351,7 @@ export default function InvoiceEditor({
                   <Button
                     variant={"default"}
                     className="hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed border-none"
+                    disabled={isUnchanged}
                   >
                     <Save />
                     <span>{isSaving ? "Saving..." : "Save data"}</span>
@@ -294,10 +391,36 @@ export default function InvoiceEditor({
           </div>
           <Card className="flex gap-5">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold tracking-tight text-balance">
-                Invoice Details
-              </CardTitle>
-              <CardAction>
+              <div className="flex flex-row justify-between items-center w-full">
+                <CardTitle className="text-xl font-semibold tracking-tight text-balance">
+                  Invoice Details
+                </CardTitle>
+              </div>
+              <CardAction className="flex gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant={"secondary"}
+                      className="hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isUnchanged}
+                    >
+                      Discard draft
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure to discard this draft?
+                      </AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={clearDraftAndReset}>
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <Button variant="destructive" onClick={clearAllExpenses}>
                   Clear all
                 </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { FilePlus, Trash, Edit3, Send } from "lucide-react";
 import { Button } from "./ui/button";
@@ -36,10 +36,63 @@ import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { deleteInvoice } from "@/app/actions/invoice";
 import { SearchInvoiceData } from "./SearchInvoiceData";
+import { useDraftStatus } from "@/lib/hooks/useDraftStatus";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+
+// Component to check and render row-level draft badges
+function InvoiceRowDraftBadge({ invoiceId }: { invoiceId: string }) {
+  const [hasEditDraft, setHasEditDraft] = useState(false);
+
+  useEffect(() => {
+    const checkDraft = () => {
+      const savedDraft = localStorage.getItem(`invoice_draft_${invoiceId}`);
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          const hasContent =
+            (parsed.expenses && parsed.expenses.length > 0) ||
+            Boolean(parsed.invoiceData?.employeeName?.trim());
+          setHasEditDraft(hasContent);
+        } catch {
+          setHasEditDraft(false);
+        }
+      } else {
+        setHasEditDraft(false);
+      }
+    };
+
+    checkDraft();
+    window.addEventListener("storage", checkDraft);
+    return () => window.removeEventListener("storage", checkDraft);
+  }, [invoiceId]);
+
+  if (!hasEditDraft) return null;
+
+  return (
+    <span
+      style={{
+        backgroundColor: "#fef3c7",
+        color: "#92400e",
+        borderColor: "#fde68a",
+      }}
+      className="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+    >
+      Draft
+    </span>
+  );
+}
 
 const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("name");
+
+  // Draft indicator for "Add Invoice" button
+  const { hasDraft } = useDraftStatus("invoice_draft_new");
 
   const showingInvoiceData = useMemo(() => {
     const filtered = invoices.filter((invoice) => {
@@ -90,6 +143,8 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
     const result = await deleteInvoice(invoiceId);
 
     if (result?.success) {
+      // Clear any remaining draft for this invoice from storage
+      localStorage.removeItem(`invoice_draft_${invoiceId}`);
       toast.success("Invoice deleted successfully!");
     } else {
       toast.error("Failed to delete invoice");
@@ -100,19 +155,56 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
     <div className="flex flex-col gap-4 pt-4">
       {/* Top Action Bar */}
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-lg font-semibold tracking-tight hidden sm:block">
+        <h3 className="hidden text-lg font-semibold tracking-tight sm:block">
           Manage Invoices
         </h3>
-        <Button variant="default" className="w-full sm:w-auto ml-auto" asChild>
-          <Link href="/invoice/new">
-            <span>Add Invoice</span>
-            <FilePlus className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
+
+        <div className="relative ml-auto inline-flex w-full sm:w-auto">
+          <Button variant="default" className="w-full sm:w-auto" asChild>
+            <Link
+              href="/invoice/new"
+              className="flex items-center justify-center"
+            >
+              <span>Add Invoice</span>
+              <FilePlus className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+
+          {/* Shadcn UI Tooltip on Draft Dot */}
+          {hasDraft && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Unsaved draft available"
+                    style={{
+                      position: "absolute",
+                      top: "-3px",
+                      right: "-3px",
+                      width: "12px",
+                      height: "12px",
+                      backgroundColor: "#f59e0b",
+                      borderRadius: "9999px",
+                      border: "2px solid #ffffff",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                      zIndex: 50,
+                    }}
+                  >
+                    <span className="sr-only">Unsaved draft available</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="end" className="text-xs">
+                  <p className="font-medium">Unsaved draft</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
 
       <Card className="w-full shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 space-y-0">
+        <CardHeader className="flex flex-col justify-between gap-4 space-y-0 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="text-lg">Recent Invoices</CardTitle>
             <CardDescription className="text-xs md:text-sm">
@@ -131,37 +223,38 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
         </CardHeader>
         <CardContent className="p-4 sm:p-6 sm:pt-0">
           {showingInvoiceData.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground border rounded-md">
+            <div className="rounded-md border p-8 text-center text-muted-foreground">
               No invoices found.
             </div>
           ) : (
             showingInvoiceData.map((group) => (
               <div key={group.monthYear} className="mb-6 last:mb-0">
-                {/* Month/Year Group Header */}
-                <div className="text-sm font-semibold text-primary bg-muted/60 px-3 py-2 rounded-md mb-3">
+                <div className="mb-3 rounded-md bg-muted/60 px-3 py-2 text-sm font-semibold text-primary">
                   {group.monthYear}
                 </div>
 
-                {/* 1. Mobile Key-Value Card Layout (Matched with Image UI) */}
+                {/* 1. Mobile Cards */}
                 <div className="grid grid-cols-1 gap-3 md:hidden">
                   {group.invoices.map((invoice) => (
                     <div
                       key={invoice.id}
-                      className="rounded-lg border bg-card text-card-foreground shadow-xs overflow-hidden flex flex-col"
+                      className="flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-xs"
                     >
-                      {/* Card Header: ID & Action Buttons */}
-                      <div className="flex items-center justify-between p-3 bg-muted/30 border-b border-border/50">
-                        <span className="font-semibold text-sm">
-                          Id :{" "}
-                          <span className="font-bold">
-                            {invoice.id.slice(-6)}
+                      <div className="flex items-center justify-between border-b border-border/50 bg-muted/30 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold">
+                            Id :{" "}
+                            <span className="font-bold">
+                              {invoice.id.slice(-6)}
+                            </span>
                           </span>
-                        </span>
+                          <InvoiceRowDraftBadge invoiceId={invoice.id} />
+                        </div>
                         <div className="flex items-center gap-1.5">
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-7 w-7 text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                            className="h-7 w-7 border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
                             asChild
                           >
                             <Link href={`/invoice/${invoice.id}`}>
@@ -175,8 +268,7 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                         </div>
                       </div>
 
-                      {/* Card Body: Aligned Key-Value Pairs */}
-                      <div className="p-3 flex flex-col gap-1.5 text-xs sm:text-sm">
+                      <div className="flex flex-col gap-1.5 p-3 text-xs sm:text-sm">
                         <div className="flex items-center">
                           <span className="w-28 text-muted-foreground">
                             Date
@@ -185,7 +277,6 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                             : {formatDate(invoice.date)}
                           </span>
                         </div>
-
                         <div className="flex items-center">
                           <span className="w-28 text-muted-foreground">
                             Employee
@@ -194,14 +285,12 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                             : {invoice.employeeName}
                           </span>
                         </div>
-
                         <div className="flex items-center">
                           <span className="w-28 text-muted-foreground">
                             Port
                           </span>
                           <span className="font-medium">: {invoice.port}</span>
                         </div>
-
                         <div className="flex items-center">
                           <span className="w-28 text-muted-foreground">
                             Total
@@ -210,13 +299,12 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                             : {invoice.totalAmount.toLocaleString()} MMK
                           </span>
                         </div>
-
                         <div className="flex items-center">
                           <span className="w-28 text-muted-foreground">
                             Balance
                           </span>
                           <span
-                            className={`font-semibold : ${
+                            className={`font-semibold ${
                               invoice.remainingAmount > 0
                                 ? "text-emerald-600 dark:text-emerald-400"
                                 : "text-destructive"
@@ -227,12 +315,11 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                         </div>
                       </div>
 
-                      {/* Card Footer: Full Width Action Bar */}
-                      <div className="p-2 bg-muted/20 border-t border-border/40">
+                      <div className="border-t border-border/40 bg-muted/20 p-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="w-full text-xs text-primary hover:bg-primary/10 h-8"
+                          className="h-8 w-full text-xs text-primary hover:bg-primary/10"
                           asChild
                         >
                           <Link href={`/invoice/${invoice.id}`}>
@@ -245,8 +332,8 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                   ))}
                 </div>
 
-                {/* 2. Desktop Table Layout (>= 768px) */}
-                <div className="hidden md:block rounded-md border">
+                {/* 2. Desktop Table */}
+                <div className="hidden rounded-md border md:block">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -267,12 +354,15 @@ const InvoiceDataOnDashboard = ({ invoices }: { invoices: InvoiceData[] }) => {
                       {group.invoices.map((invoice) => (
                         <TableRow key={invoice.id}>
                           <TableCell className="font-medium">
-                            <Link
-                              href={`/invoice/${invoice.id}`}
-                              className="hover:underline text-primary"
-                            >
-                              {invoice.id}
-                            </Link>
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/invoice/${invoice.id}`}
+                                className="text-primary hover:underline"
+                              >
+                                {invoice.id}
+                              </Link>
+                              <InvoiceRowDraftBadge invoiceId={invoice.id} />
+                            </div>
                           </TableCell>
                           <TableCell>{formatDate(invoice.date)}</TableCell>
                           <TableCell>{invoice.employeeName}</TableCell>
@@ -322,12 +412,12 @@ function DeleteDialog({
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 text-red-600 bg-red-50 border-red-200 hover:bg-red-100"
+          className="h-7 w-7 border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
         >
           <Trash className="h-3.5 w-3.5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-[90vw] sm:max-w-lg rounded-lg">
+      <AlertDialogContent className="max-w-[90vw] rounded-lg sm:max-w-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -339,7 +429,7 @@ function DeleteDialog({
             and remove its data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+        <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row">
           <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} variant="destructive">
             Delete Invoice
