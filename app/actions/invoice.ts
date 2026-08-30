@@ -99,11 +99,32 @@ export async function getAllInvoice(): Promise<{
       },
     });
 
-    const formattedData = invoiceData.map((invoice) => ({
-      ...invoice,
-      date: invoice.date.toISOString(),
-      expenses: [...invoice.jobExpenses, ...invoice.simpleExpenses],
-    }));
+    const formattedData = invoiceData.map((invoice) => {
+      const formattedJobExpenses = (invoice.jobExpenses || []).map((job) => ({
+        ...job,
+        type: "job",
+      }));
+
+      const formattedSimpleExpenses = (invoice.simpleExpenses || []).map(
+        (simple) => ({
+          ...simple,
+          type: "simple",
+          date: simple.date ? simple.date.toISOString() : "",
+        }),
+      );
+
+      return {
+        ...invoice,
+        date: invoice.date ? invoice.date.toISOString() : "",
+        advanceDate: invoice.advanceDate
+          ? invoice.advanceDate.toISOString()
+          : "",
+        prevBalanceDate: invoice.prevBalanceDate
+          ? invoice.prevBalanceDate.toISOString()
+          : "",
+        expenses: [...formattedJobExpenses, ...formattedSimpleExpenses],
+      };
+    });
 
     return { invoices: formattedData as unknown as InvoiceData[], user: user };
   } catch (error) {

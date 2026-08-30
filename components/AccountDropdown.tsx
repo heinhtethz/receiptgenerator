@@ -16,7 +16,7 @@ import Link from "next/link";
 export function AccountDropdown({ email }: { email: string | undefined }) {
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/auth/login";
+    window.location.href = "/auth/signin";
   };
 
   return (
