@@ -132,7 +132,7 @@ export const Preview = ({
                     </span>
                     <span className="flex-1 pr-2 sm:pr-4 font-bold text-xs sm:text-sm uppercase tracking-wide whitespace-pre-wrap wrap-break-word">
                       {expense.description.trim()}
-                      {expense.type === "simple" && (
+                      {expense.type === "simple" && expense.date && (
                         <span className="ml-3">
                           ( {formatDate(expense.date)} )
                         </span>
