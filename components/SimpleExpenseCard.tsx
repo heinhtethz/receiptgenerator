@@ -84,7 +84,6 @@ const SimpleExpenseCard = ({
             <Input
               type="date"
               id="date-picker"
-              min={firstDayOfCurrentMonth}
               value={formatDate(date) || ""}
               onChange={(e) => onUpdateExpense({ date: e.target.value })}
               className="uppercase text-xs"

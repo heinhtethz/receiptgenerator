@@ -43,7 +43,7 @@ import {
   SubExpense,
 } from "@/types";
 import { CirclePlus, Eye, Save } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
@@ -322,6 +322,7 @@ export default function InvoiceEditor({
     localStorage.removeItem(draftKey);
     setInvoiceData(initialData);
     setExpenses(initialData.expenses || []);
+    redirect("/dashboard");
   };
 
   if (!isDraftLoaded) {
@@ -455,7 +456,6 @@ export default function InvoiceEditor({
                     <FieldLabel>Date</FieldLabel>
                     <Input
                       type="date"
-                      min={firstDayOfCurrentMonth}
                       value={formatDate(invoiceData.date)}
                       onChange={(e) =>
                         setInvoiceData({ ...invoiceData, date: e.target.value })
@@ -490,7 +490,6 @@ export default function InvoiceEditor({
                     <FieldLabel>Balance Date</FieldLabel>
                     <Input
                       type="date"
-                      min={firstDayOfCurrentMonth}
                       value={formatDate(invoiceData.prevBalanceDate)}
                       onChange={(e) =>
                         setInvoiceData({
@@ -525,7 +524,6 @@ export default function InvoiceEditor({
                     <FieldLabel>Advance Date</FieldLabel>
                     <Input
                       type="date"
-                      min={firstDayOfCurrentMonth}
                       value={formatDate(invoiceData.advanceDate)}
                       onChange={(e) =>
                         setInvoiceData({
